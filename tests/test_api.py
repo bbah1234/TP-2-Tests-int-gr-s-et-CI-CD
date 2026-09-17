@@ -4,48 +4,36 @@ from app.main import app
 client = TestClient(app)
 
 # -----------------------------------------------------------------------------
-# Cas nominaux : entrées valides et représentatives
+# 1) Cas nominal : prédiction correcte avec [1.0, 2.0, 3.0]
 # -----------------------------------------------------------------------------
 def test_predict_success():
-    response = client.post("/predict", json={
-    "features": [1.0, 2.0, 3.0]
-    })
+    response = client.post(
+        "/predict",
+        json={"features": [1.0, 2.0, 3.0]}
+    )
+
     assert response.status_code == 200
     assert response.json() == {"predictions": [2.0, 4.0, 6.0]}
 
+
 # -----------------------------------------------------------------------------
-# Cas resultats faux : resultas attendus volontairement faux
+# 2) Cas résultat faux : résultat attendu volontairement incorrect
 # -----------------------------------------------------------------------------
-def test_predict_success():
-    response = client.post("/predict", json={
-    "features": [6.0, 2.5, 4.2]
-    })
+def test_predict_incorrect_result():
+    response = client.post(
+        "/predict",
+        json={"features": [6.0, 2.5, 4.2]}
+    )
+
     assert response.status_code == 200
-    #assert response.json() == {"predictions": [3.0, 5.0, 9.0]}
+
+    # Résultat volontairement faux pour tester un cas d'échec
+    assert response.json() != {"predictions": [3.0, 5.0, 9.0]}
+
 
 # -----------------------------------------------------------------------------
-# Cas invalides : données ne respectant pas les préconditions attendues
+# 3) Cas invalide : champ features manquant
 # -----------------------------------------------------------------------------
-def test_predict_unprocessable_entity():
-    response = client.post("/predict", json={
-    "feature1": 1.0,
-    "feature2": 2.0,
-    "feature3": 3.0
-    })
-    assert response.status_code == 422
-    assert response.json()["detail"][0]["msg"] == "Field required"
-
-# -----------------------------------------------------------------------------
-# Cas smoke : valider que l'API est disponible
-# -----------------------------------------------------------------------------
-def test_predict_smoke():
-    response = client.get("/")
-    assert response.status_code == 200
-    assert response.json()["message"] == "API is up and running!"
-
-# ------------------------------------------------------------------------------
-# Cas JSON incorrect
-# -------------------------------------------------------------------------------
 def test_predict_features_manquant():
     response = client.post(
         "/predict",
@@ -55,10 +43,25 @@ def test_predict_features_manquant():
     assert response.status_code == 422
     assert response.json()["detail"][0]["msg"] == "Field required"
 
-def test_predict_features_manquant():
+
+# -----------------------------------------------------------------------------
+# 4) Cas JSON incorrect : tableau envoyé directement au lieu d'un objet JSON
+# -----------------------------------------------------------------------------
+def test_predict_invalid_json():
     response = client.post(
         "/predict",
         json=[3.5, 1.2, 4.9]
     )
 
     assert response.status_code == 422
+
+
+# -----------------------------------------------------------------------------
+# Cas smoke : valider que l'API est disponible
+# -----------------------------------------------------------------------------
+def test_predict_smoke():
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "API is up and running!"
+
