@@ -17,7 +17,7 @@ def test_predict_success():
 
 
 # -----------------------------------------------------------------------------
-# 2) Cas résultat faux : résultat attendu volontairement incorrect
+# 2) Cas résultat incorrect : résultat attendu volontairement faux
 # -----------------------------------------------------------------------------
 def test_predict_incorrect_result():
     response = client.post(
@@ -27,12 +27,12 @@ def test_predict_incorrect_result():
 
     assert response.status_code == 200
 
-    # Résultat volontairement faux pour tester un cas d'échec
+    # On vérifie que l'API ne retourne pas ce résultat volontairement faux
     assert response.json() != {"predictions": [3.0, 5.0, 9.0]}
 
 
 # -----------------------------------------------------------------------------
-# 3) Cas invalide : champ features manquant
+# 3) Cas invalide : champ "features" manquant
 # -----------------------------------------------------------------------------
 def test_predict_features_manquant():
     response = client.post(
@@ -45,7 +45,7 @@ def test_predict_features_manquant():
 
 
 # -----------------------------------------------------------------------------
-# 4) Cas JSON incorrect : tableau envoyé directement au lieu d'un objet JSON
+# 4) Cas JSON incorrect : tableau envoyé directement
 # -----------------------------------------------------------------------------
 def test_predict_invalid_json():
     response = client.post(
@@ -57,7 +57,7 @@ def test_predict_invalid_json():
 
 
 # -----------------------------------------------------------------------------
-# Cas smoke : valider que l'API est disponible
+# Cas smoke : vérifier que l'API est disponible
 # -----------------------------------------------------------------------------
 def test_predict_smoke():
     response = client.get("/")
